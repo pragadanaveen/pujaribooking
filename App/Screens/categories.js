@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'rea
 import design from '../Images/bddesign.jpg';
 import Icon from 'react-native-vector-icons/Ionicons';
 import api from '../Components/api';
+import Loader from '../Config/Loader';
 
 const Categories = ({ navigation, route }) => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -13,19 +14,20 @@ const Categories = ({ navigation, route }) => {
         getCatelist();
     }, []);
 
-    const getCatelist = async () => {
-
-        const resp = await api.get('categories');
+    const getCatelist = async (page = 1) => {
+        const resp = await api.get(`categories?page=${page}`);
         setCategories(resp.data.data);
         setTotalPages(resp.data.last_page);
         setCurrentPage(resp.data.current_page);
-        // setTotalPages(resp.data.current_page);
     };
+
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
             setCurrentPage(newPage);
+            getCatelist(newPage);
         }
     };
+
     return (
         <>
             <Image source={design} style={styles.image} />
@@ -39,44 +41,41 @@ const Categories = ({ navigation, route }) => {
                 <View style={styles.main}>
                     {categories.length > 0 ? (
                         categories.map((category, key) => (
-
                             <View key={key} style={styles.box}>
-                                {/* <Text style={styles.text}>{category.pooja_id}</Text> */}
                                 <Image
                                     source={{ uri: `https://pujaribooking.com/priest/app/webservice/images/${category.image}` }}
                                     style={styles.categoryImage}
                                 />
                                 <Text style={styles.text} > {category.name}</Text>
-                                {/* <Text style={styles.text}>{category.priest_id}</Text> */}
-                                {/* <Text style={styles.text}>{category.image}</Text> */}
-
-                                {/* <Text style={styles.text}>{category.createtime}</Text> */}
                             </View>
                         ))
-                    ) : (
-                        <Text>Loading........</Text>
-                    )}
+                    ) :
+                        // (
+                        //     <Text>Loading........</Text>
+                        // )
+                        <Loader />
+                    }
                 </View >
+                {totalPages > 1 && (
+                    <View style={styles.paginationContainer}>
+                        <TouchableOpacity
+                            style={[styles.button, { marginRight: 10 }]}
+                            onPress={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                        >
+                            <Text style={styles.buttonText}>Previous</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.pageInfo}>Page {currentPage} of {totalPages}</Text>
+                        <TouchableOpacity
+                            style={[styles.button, { marginLeft: 10 }]}
+                            onPress={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                        >
+                            <Text style={styles.buttonText}>Next</Text>
+                        </TouchableOpacity>
+                    </View >
+                )}
             </ScrollView >
-            {totalPages > 1 && (
-                <View style={styles.paginationContainer}>
-                    <TouchableOpacity
-                        style={[styles.button, { marginRight: 10 }]}
-                        onPress={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                    >
-                        <Text style={styles.buttonText}>Previous</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.pageInfo}>Page {currentPage} of {totalPages}</Text>
-                    <TouchableOpacity
-                        style={[styles.button, { marginLeft: 10 }]}
-                        onPress={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                    >
-                        <Text style={styles.buttonText}>Next</Text>
-                    </TouchableOpacity>
-                </View >
-            )}
         </>
     );
 };
@@ -113,7 +112,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         width: '45%',
         // height: 250,
-        padding: 15,
+        padding: 12,
         margin: 'auto',
         position: 'relative',
         marginBottom: 20
@@ -126,6 +125,7 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize: 14,
         fontWeight: 'bold',
+        margin: 'auto',
     },
     categoryImage: {
         width: '100%',

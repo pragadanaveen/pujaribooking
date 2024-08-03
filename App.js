@@ -29,7 +29,6 @@ import Loader from "./App/Config/Loader";
 import Selectpriest from "./App/Screens/select";
 import Wallet from "./App/Screens/wallet";
 import Categories from "./App/Screens/categories";
-// import EditProfile from "./App/Components/editprofile";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
