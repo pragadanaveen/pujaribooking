@@ -5,11 +5,13 @@ import logo from '../Images/file.png';
 import design from '../Images/bddesign.jpg';
 import api from '../Components/api';
 
-const Event = ({ navigation }) => {
+const Event = ({ navigation, route }) => {
     const [searchText, setSearchText] = useState('');
     const [events, setEvents] = useState([]);
-    console.log(events);
-    
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+
     useEffect(()=>{
         getEvents();
     },[]);
@@ -17,6 +19,8 @@ const Event = ({ navigation }) => {
     const getEvents = async() => {
         const resp = await api.get('events');
         setEvents(resp.data.data);
+        setTotalPages(resp.data.last_page);
+        setCurrentPage(resp.data.current_page);
     }
 
     return (
