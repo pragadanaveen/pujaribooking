@@ -4,7 +4,9 @@ import design from '../Images/bddesign.jpg';
 import Icon from 'react-native-vector-icons/Ionicons';
 import api from '../Components/api';
 
-const Categories = ({ navigation }) => {
+const Categories = ({ navigation, route }) => {
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
@@ -12,11 +14,18 @@ const Categories = ({ navigation }) => {
     }, []);
 
     const getCatelist = async () => {
+
         const resp = await api.get('categories');
         setCategories(resp.data.data);
-
+        setTotalPages(resp.data.last_page);
+        setCurrentPage(resp.data.current_page);
+        // setTotalPages(resp.data.current_page);
     };
-
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+        }
+    };
     return (
         <>
             <Image source={design} style={styles.image} />
@@ -32,6 +41,7 @@ const Categories = ({ navigation }) => {
                         categories.map((category, key) => (
 
                             <View key={key} style={styles.box}>
+                                {/* <Text style={styles.text}>{category.pooja_id}</Text> */}
                                 <Image
                                     source={{ uri: `https://pujaribooking.com/priest/app/webservice/images/${category.image}` }}
                                     style={styles.categoryImage}
@@ -44,10 +54,29 @@ const Categories = ({ navigation }) => {
                             </View>
                         ))
                     ) : (
-                        <Text>No categories available</Text>
+                        <Text>Loading........</Text>
                     )}
                 </View >
             </ScrollView >
+            {totalPages > 1 && (
+                <View style={styles.paginationContainer}>
+                    <TouchableOpacity
+                        style={[styles.button, { marginRight: 10 }]}
+                        onPress={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
+                        <Text style={styles.buttonText}>Previous</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.pageInfo}>Page {currentPage} of {totalPages}</Text>
+                    <TouchableOpacity
+                        style={[styles.button, { marginLeft: 10 }]}
+                        onPress={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                        <Text style={styles.buttonText}>Next</Text>
+                    </TouchableOpacity>
+                </View >
+            )}
         </>
     );
 };
@@ -104,6 +133,31 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         resizeMode: 'cover',
     },
+    paginationContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: 15,
+    },
+    pageInfo: {
+        fontSize: 16,
+        marginHorizontal: 10,
+        color: '#000'
+    },
+    buttonview: {
+        marginTop: 15,
+        alignItems: 'center'
+    },
+    loginButton: {
+        marginBottom: 10,
+        width: '25%',
+        height: 40,
+        backgroundColor: '#007bff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 8,
+    },
+
 });
 
 export default Categories;
